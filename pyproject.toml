@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nba_prep"
+version = "0.1.0"
+description = "A utility package for cleaning and engineering features for NBA career longevity prediction."
+readme = "README.md"
+authors = [
+    { name = "Aryan Goel" }
+]
+requires-python = ">=3.7"
+dependencies = [
+    "numpy",
+    "pandas"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov"
+]
