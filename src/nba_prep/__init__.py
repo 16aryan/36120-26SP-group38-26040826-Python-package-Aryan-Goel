@@ -4,6 +4,8 @@ from .features import (
     calculate_true_shooting_percentage,
     calculate_defensive_impact,
     calculate_scoring_efficiency,
+    calculate_cumulative_features,
+    calculate_advanced_recruit_and_conference_features,
 )
 
 __all__ = [
@@ -14,4 +16,6 @@ __all__ = [
     "calculate_true_shooting_percentage",
     "calculate_defensive_impact",
     "calculate_scoring_efficiency",
+    "calculate_cumulative_features",
+    "calculate_advanced_recruit_and_conference_features",
 ]
