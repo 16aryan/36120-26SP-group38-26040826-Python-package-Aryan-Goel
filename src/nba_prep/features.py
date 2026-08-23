@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 def calculate_ast_tov_ratio(ast, tov):
     """
@@ -52,3 +53,90 @@ def calculate_scoring_efficiency(pts, min_per):
         return np.where(min_per == 0, 0.0, pts / min_per)
     except Exception:
         return np.nan
+
+def calculate_cumulative_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Computes cumulative stats, progression, and running metrics for players (pid).
+    Assumes df has already been sorted by pid and year.
+    """
+    # Create copies of columns to avoid modifying the original dataframe
+    res = pd.DataFrame(index=df.index)
+    
+    # Calculate season index (1st season, 2nd season, etc.)
+    res['career_season_num'] = df.groupby('pid').cumcount() + 1
+    
+    # Cumulative stats
+    res['cum_GP'] = df.groupby('pid')['GP'].cumsum()
+    res['cum_pts'] = df.groupby('pid')['pts'].cumsum()
+    res['cum_ast'] = df.groupby('pid')['ast'].cumsum()
+    res['cum_stl'] = df.groupby('pid')['stl'].cumsum()
+    res['cum_blk'] = df.groupby('pid')['blk'].cumsum()
+    res['cum_treb'] = df.groupby('pid')['treb'].cumsum()
+    res['cum_stops'] = df.groupby('pid')['stops'].cumsum()
+    
+    # Cumulative means (mean per season up to current)
+    res['cum_mean_bpm'] = df.groupby('pid')['bpm'].cumsum() / res['career_season_num']
+    res['cum_mean_porpag'] = df.groupby('pid')['porpag'].cumsum() / res['career_season_num']
+    res['cum_mean_dporpag'] = df.groupby('pid')['dporpag'].cumsum() / res['career_season_num']
+    res['cum_mean_pts'] = df.groupby('pid')['pts'].cumsum() / res['career_season_num']
+    res['cum_mean_ast'] = df.groupby('pid')['ast'].cumsum() / res['career_season_num']
+    res['cum_mean_treb'] = df.groupby('pid')['treb'].cumsum() / res['career_season_num']
+    res['cum_mean_stl'] = df.groupby('pid')['stl'].cumsum() / res['career_season_num']
+    res['cum_mean_blk'] = df.groupby('pid')['blk'].cumsum() / res['career_season_num']
+    res['cum_mean_usg'] = df.groupby('pid')['usg'].cumsum() / res['career_season_num']
+    res['cum_mean_min_per'] = df.groupby('pid')['Min_per'].cumsum() / res['career_season_num']
+    
+    # Running maximums
+    res['max_bpm_to_date'] = df.groupby('pid')['bpm'].cummax()
+    res['max_porpag_to_date'] = df.groupby('pid')['porpag'].cummax()
+    res['max_dporpag_to_date'] = df.groupby('pid')['dporpag'].cummax()
+    res['max_pts_to_date'] = df.groupby('pid')['pts'].cummax()
+    res['max_ast_to_date'] = df.groupby('pid')['ast'].cummax()
+    res['max_treb_to_date'] = df.groupby('pid')['treb'].cummax()
+    res['max_stl_to_date'] = df.groupby('pid')['stl'].cummax()
+    res['max_blk_to_date'] = df.groupby('pid')['blk'].cummax()
+    res['max_usg_to_date'] = df.groupby('pid')['usg'].cummax()
+    res['max_min_per_to_date'] = df.groupby('pid')['Min_per'].cummax()
+    
+    # Year-over-year progression (difference from previous season)
+    res['bpm_progression'] = df.groupby('pid')['bpm'].diff().fillna(0.0)
+    res['pts_progression'] = df.groupby('pid')['pts'].diff().fillna(0.0)
+    res['porpag_progression'] = df.groupby('pid')['porpag'].diff().fillna(0.0)
+    
+    return res
+
+def calculate_advanced_recruit_and_conference_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Computes recruiting rank indicators, major conference flags, and per-minute statistics.
+    """
+    res = pd.DataFrame(index=df.index)
+    
+    # Recruiting rank cleaning
+    res['has_rec_rank'] = df['Rec Rank'].notna().astype(float)
+    res['rec_rank_filled'] = df['Rec Rank'].fillna(150.0)
+    
+    # High-major conferences flag loaded from external configurations if available
+    import os
+    external_path = os.path.join("data", "external", "major_conferences.csv")
+    if os.path.exists(external_path):
+        try:
+            ext_df = pd.read_csv(external_path)
+            major_confs = set(ext_df[ext_df["is_power_conference"] == 1]["conf"].dropna().unique())
+        except Exception:
+            major_confs = {'ACC', 'SEC', 'B10', 'B12', 'BE', 'P10', 'P12'}
+    else:
+        major_confs = {'ACC', 'SEC', 'B10', 'B12', 'BE', 'P10', 'P12'}
+        
+    res['is_major_conf'] = df['conf'].isin(major_confs).astype(float)
+    
+    # Per-minute features
+    mp_safe = np.where(df['mp'] == 0, 1e-5, df['mp'])
+    res['pts_per_min'] = df['pts'] / mp_safe
+    res['ast_per_min'] = df['ast'] / mp_safe
+    res['stl_per_min'] = df['stl'] / mp_safe
+    res['blk_per_min'] = df['blk'] / mp_safe
+    res['treb_per_min'] = df['treb'] / mp_safe
+    
+    return res
+
+
