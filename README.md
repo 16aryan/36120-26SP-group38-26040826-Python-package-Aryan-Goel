@@ -11,7 +11,7 @@ pip install -e .
 
 To install from TestPyPI:
 ```bash
-pip install --index-url https://test.pypi.org/simple/ --no-deps nba_prep
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nba_prep_26040826
 ```
 
 ## Features
