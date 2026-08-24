@@ -52,3 +52,29 @@ report = generate_scouting_report(
 print(report)
 ```
 
+## Development & Quality Standards
+
+### 1. Robust Unit Test Coverage
+This package is fully verified by 13 unit tests distributed across 5 specialized test suites:
+* **`test_cleaning.py`**: Validates height parsing, collegiate year code standardization, and birthday age extraction.
+* **`test_features.py`**: Validates advanced basketball metric calculations (Assist-to-Turnover ratio, True Shooting %, Defensive Impact score, and Offensive interaction features).
+* **`test_cumulative.py`**: Validates career historical tracking logic (running career counts, running season averages, peak metrics to date, and season-over-season progression deltas).
+* **`test_analytics.py`**: Validates prospect classification tiers and descriptive scouting report generators.
+* **`test_evaluation.py`**: Validates prediction ranking metrics (AUPRC, AUROC, optimal classification thresholds) and financial decision ROI estimators.
+
+To execute tests locally, run:
+```bash
+pytest
+```
+
+### 2. Continuous Integration (CI) Pipeline
+A GitHub Actions workflow is configured in `.github/workflows/test.yml` to automatically verify code integrity. On every push and pull request, the test runner:
+* Spins up containerized environments across multiple Python versions (`3.10`, `3.11`, `3.12`, `3.13`).
+* Installs dependencies, sets up the package, and executes the entire unit test suite.
+
+### 3. Packaging & Standards Compliance
+* **Pyproject Configuration (`pyproject.toml`)**: Structured with PEP 621 metadata, dependencies (`numpy`, `pandas`), development requirements (`pytest`, `pytest-cov`), and default pytest search paths.
+* **Licensing (`LICENSE`)**: Distributed under the permissive open-source MIT License.
+* **Git Hygiene (`.gitignore`)**: Configured to ensure compilation caches (`__pycache__`), build directories (`dist/`, `build/`), test reports, and IDE configurations are kept out of source control tracking.
+
+
