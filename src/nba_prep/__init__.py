@@ -8,6 +8,7 @@ from .features import (
     calculate_advanced_recruit_and_conference_features,
 )
 from .analytics import categorize_prospect, generate_scouting_report
+from .evaluation import calculate_model_metrics, estimate_draft_roi
 
 __all__ = [
     "clean_height",
@@ -21,4 +22,6 @@ __all__ = [
     "calculate_advanced_recruit_and_conference_features",
     "categorize_prospect",
     "generate_scouting_report",
+    "calculate_model_metrics",
+    "estimate_draft_roi",
 ]
