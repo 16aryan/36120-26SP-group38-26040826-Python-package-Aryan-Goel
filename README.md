@@ -77,4 +77,52 @@ A GitHub Actions workflow is configured in `.github/workflows/test.yml` to autom
 * **Licensing (`LICENSE`)**: Distributed under the permissive open-source MIT License.
 * **Git Hygiene (`.gitignore`)**: Configured to ensure compilation caches (`__pycache__`), build directories (`dist/`, `build/`), test reports, and IDE configurations are kept out of source control tracking.
 
+--------
 
+## Reproducibility Instructions
+
+### 1. Install dependencies and local package
+To set up the project environment and install the required libraries:
+```bash
+pip install -r requirements.txt
+```
+This will automatically install my custom `nba_prep` feature engineering package in editable mode.
+
+### 2. Preprocess Data and Engineer Features
+Run the dataset pipeline to clean the raw data (height, year, age) and generate the advanced basketball features:
+```bash
+python -m AT1_AML.dataset
+```
+This will save the processed training and test features to `data/processed/train_processed.csv` and `data/processed/test_processed.csv`.
+
+### 3. Train Model and Generate Predictions
+Run the cross-validated model training script:
+```bash
+python -m AT1_AML.modeling.train
+```
+This will:
+- Execute a 5-Fold Stratified Group Cross-Validation (grouped by `pid` to prevent player-level leakage) using an ensemble of **LightGBM**, **XGBoost**, and **CatBoost**.
+- Output overall AUPRC scores (target metric) for each individual model and the blended ensemble.
+- Save the predicted probabilities on each player's final college season to `submission.csv` (deduplicated by `pid` and ready for Kaggle upload).
+
+### 4. Interactive Analysis
+My interactive end-to-end walkthrough notebook is available at `notebooks/36120-26SP-group38-26040826-AT1-experiment-1.ipynb`.
+
+## Latest Model Performance & Credit
+
+This training run was performed by **Aryan Goel (26040826)**.
+
+### Performance Scores (OOF AUPRC)
+* **LightGBM**: `0.48416`
+* **Extra Trees**: `0.49197`
+* **Logistic Regression**: `0.48983`
+* **XGBoost**: `0.50970`
+* **CatBoost**: `0.51188`
+* **Blended Ensemble**: `0.52035`
+
+### Generated Artifacts
+* **Ensembled Models**: `models/final_lightgbm.txt`, `models/final_xgboost.json`, and `models/final_catboost.cbm`
+* **Predictions**: `submission.csv` (6,261 rows, deduplicated unique player IDs)
+
+
+--------
