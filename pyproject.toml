@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nba_prep_26040826"
-version = "0.3.1"
+version = "0.3.2"
 description = "A utility package for cleaning and engineering features for NBA career longevity prediction."
 readme = "README.md"
 authors = [
@@ -13,7 +13,8 @@ authors = [
 requires-python = ">=3.7"
 dependencies = [
     "numpy",
-    "pandas"
+    "pandas",
+    "scikit-learn"
 ]
 
 [project.optional-dependencies]

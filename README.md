@@ -1,6 +1,6 @@
 # nba_prep
 
-[![TestPyPI](https://img.shields.io/badge/TestPyPI-v0.3.1-blue.svg?logo=pypi&logoColor=white)](https://test.pypi.org/project/nba-prep-26040826/0.3.1/)
+[![TestPyPI](https://img.shields.io/badge/TestPyPI-v0.3.2-blue.svg?logo=pypi&logoColor=white)](https://test.pypi.org/project/nba-prep-26040826/0.3.2/)
 [![Tests Status](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel/actions/workflows/test.yml/badge.svg)](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel/actions)
 
 `nba_prep` is a Python utility package designed to clean and engineer features for predicting NBA career longevity.
