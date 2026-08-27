@@ -139,21 +139,5 @@ This will:
 ### 4. Interactive Analysis
 My interactive end-to-end walkthrough notebook is available at `notebooks/36120-26SP-group38-26040826-AT1-experiment-1.ipynb`.
 
-## Latest Model Performance & Credit
-
-This training run was performed by **Aryan Goel (26040826)**.
-
-### Performance Scores (OOF AUPRC)
-* **LightGBM**: `0.48416`
-* **Extra Trees**: `0.49197`
-* **Logistic Regression**: `0.48983`
-* **XGBoost**: `0.50970`
-* **CatBoost**: `0.51188`
-* **Blended Ensemble**: `0.52035`
-
-### Generated Artifacts
-* **Ensembled Models**: `models/final_lightgbm.txt`, `models/final_xgboost.json`, and `models/final_catboost.cbm`
-* **Predictions**: `submission.csv` (6,261 rows, deduplicated unique player IDs)
-
-
 --------
+
