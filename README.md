@@ -51,16 +51,29 @@ report = generate_scouting_report(
 )
 print(report)
 ```
-
+--------
 ## Development & Quality Standards
 
 ### 1. Robust Unit Test Coverage
 This package is fully verified by 13 unit tests distributed across 5 specialized test suites:
-* **`test_cleaning.py`**: Validates height parsing, collegiate year code standardization, and birthday age extraction.
-* **`test_features.py`**: Validates advanced basketball metric calculations (Assist-to-Turnover ratio, True Shooting %, Defensive Impact score, and Offensive interaction features).
-* **`test_cumulative.py`**: Validates career historical tracking logic (running career counts, running season averages, peak metrics to date, and season-over-season progression deltas).
-* **`test_analytics.py`**: Validates prospect classification tiers and descriptive scouting report generators.
-* **`test_evaluation.py`**: Validates prediction ranking metrics (AUPRC, AUROC, optimal classification thresholds) and financial decision ROI estimators.
+* **`test_cleaning.py`**: Validates data cleaning utilities under [`src/nba_prep/cleaning.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/cleaning.py).
+  * `clean_height`: Verifies parsing height strings (e.g. `"6-7"` to `79.0` inches) and ensures missing (`None`) or invalid values safely return `NaN`.
+  * `clean_year`: Validates mapping class year abbreviations (`"Fr"`, `"So"`, `"Jr"`, `"Sr"`) and floats/whitespace-padded strings to numeric ranks (`1` to `4`).
+  * `calculate_age`: Confirms calculation of prospect age from birth date strings and season years, handling invalid formats gracefully.
+* **`test_features.py`**: Validates core basketball features under [`src/nba_prep/features.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/features.py).
+  * `calculate_ast_tov_ratio`: Tests assist-to-turnover ratio logic with division-by-zero protection (applying a $1e-5$ epsilon).
+  * `calculate_true_shooting_percentage`: Verifies standard scoring efficiency formulas (True Shooting % accounting for FGA and FTA).
+  * `calculate_defensive_impact`: Checks weighted defensive impact metrics (combining steals, blocks, and defensive rebounds).
+  * `calculate_scoring_efficiency`: Tests production scaling relative to playing minutes percentage.
+  * `calculate_advanced_recruit_and_conference_features`: Validates filling high school recruiting ranks, setting binary index flags, flagging Power Conferences, and computing per-minute stats.
+* **`test_cumulative.py`**: Validates historical career progression logic under [`src/nba_prep/features.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/features.py).
+  * `calculate_cumulative_features`: Tests grouped aggregation by Player ID (`pid`) over successive calendar years to calculate running career counts, running season averages (e.g., Box Plus-Minus, usage rates), seasonal progression deltas, and peak metrics to date.
+* **`test_analytics.py`**: Validates scouting reports and tier classifications under [`src/nba_prep/analytics.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/analytics.py).
+  * `categorize_prospect`: Tests categorization of draft prospects into four distinct talent tiers (Franchise Core, Rotation Contributor, G-League, High Risk) based on model probabilities.
+  * `generate_scouting_report`: Confirms correct generation of text-based scouting profile reports with qualitative descriptors based on on-court statistics.
+* **`test_evaluation.py`**: Validates model evaluation and business metrics under [`src/nba_prep/evaluation.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/evaluation.py).
+  * `calculate_model_metrics`: Tests standard classification rankings (AUPRC, AUROC, base rate) and locates the F1-optimizing threshold.
+  * `estimate_draft_roi`: Verifies business metrics like draft success rates, salary cap space wasted on busts, and scouting hours/travel saved.
 
 To execute tests locally, run:
 ```bash
@@ -76,6 +89,24 @@ A GitHub Actions workflow is configured in `.github/workflows/test.yml` to autom
 * **Pyproject Configuration (`pyproject.toml`)**: Structured with PEP 621 metadata, dependencies (`numpy`, `pandas`), development requirements (`pytest`, `pytest-cov`), and default pytest search paths.
 * **Licensing (`LICENSE`)**: Distributed under the permissive open-source MIT License.
 * **Git Hygiene (`.gitignore`)**: Configured to ensure compilation caches (`__pycache__`), build directories (`dist/`, `build/`), test reports, and IDE configurations are kept out of source control tracking.
+
+
+--------
+## Latest Model Performance & Credit
+
+This training run was performed by **Aryan Goel (26040826)**.
+
+### Performance Scores (OOF AUPRC)
+* **LightGBM**: `0.48416`
+* **Extra Trees**: `0.49197`
+* **Logistic Regression**: `0.48983`
+* **XGBoost**: `0.50970`
+* **CatBoost**: `0.51188`
+* **Blended Ensemble**: `0.52035`
+
+### Generated Artifacts
+* **Ensembled Models**: `models/final_lightgbm.txt`, `models/final_xgboost.json`, and `models/final_catboost.cbm`
+* **Predictions**: `submission.csv` (6,261 rows, deduplicated unique player IDs)
 
 --------
 
