@@ -1,3 +1,9 @@
+"""
+nba_prep - Prospect Analytics & Scouting
+This module provides functions to categorize prospects into qualitative draft tiers
+and generate textual scouting reports summarizing their collegiate box score profiles.
+"""
+
 import numpy as np
 import pandas as pd
 
@@ -5,12 +11,19 @@ def categorize_prospect(probability):
     """
     Categorizes the predicted probability of NBA career longevity (>= 3 seasons)
     into actionable tiers for front-office decision makers.
+    
+    Parameters:
+        probability (float/str): Predicted probability score between 0.0 and 1.0.
+        
+    Returns:
+        str: Actionable scouting tier description.
     """
     try:
         p = float(probability)
         if not (0.0 <= p <= 1.0):
             return "Invalid Probability"
         
+        # Classify into scout-friendly ranges
         if p >= 0.75:
             return "Tier 1: Franchise Core (Elite)"
         elif p >= 0.45:
@@ -25,6 +38,16 @@ def categorize_prospect(probability):
 def generate_scouting_report(player_name, bpm, true_shooting, defensive_impact, rec_rank=None):
     """
     Generates a concise textual scouting report card summarizing a prospect's collegiate profile.
+    
+    Parameters:
+        player_name (str): Name of the prospect player.
+        bpm (float): Box Plus-Minus (bpm) overall impact score.
+        true_shooting (float): True Shooting percentage (ts%).
+        defensive_impact (float): Calculated Defensive Impact score.
+        rec_rank (float, optional): High school recruiting rank (1-150+).
+        
+    Returns:
+        str: Formatted scouting report summary card.
     """
     try:
         report = []
@@ -70,3 +93,4 @@ def generate_scouting_report(player_name, bpm, true_shooting, defensive_impact, 
         return "\n".join(report)
     except Exception as e:
         return f"Error generating scouting report: {str(e)}"
+

@@ -1,21 +1,43 @@
+"""
+nba_prep - Feature Engineering Utilities
+This module calculates advanced basketball metrics, cumulative seasonal stats,
+and recruiting/conference strength indices for NBA prospect evaluation.
+"""
+
 import numpy as np
 import pandas as pd
 
 def calculate_ast_tov_ratio(ast, tov):
     """
     Calculates Assist-to-Turnover ratio, handling zero turnovers cleanly.
+    
+    Parameters:
+        ast (array-like): Assist count(s).
+        tov (array-like): Turnover count(s).
+        
+    Returns:
+        array/float: Assist-to-Turnover ratio, protected with an epsilon factor for zero turnovers.
     """
     try:
         ast = np.array(ast, dtype=float)
         tov = np.array(tov, dtype=float)
-        # For zero turnovers, divide by 1e-5 (or return a very high ratio)
+        # For zero turnovers, divide by 1e-5 (or return a very high ratio) to avoid division by zero
         return np.where(tov == 0, ast / 1e-5, ast / tov)
     except Exception:
         return np.nan
 
 def calculate_true_shooting_percentage(pts, fga, fta):
     """
-    Calculates True Shooting Percentage: PTS / (2 * (FGA + 0.44 * FTA)).
+    Calculates True Shooting Percentage (TS%): PTS / (2 * (FGA + 0.44 * FTA)).
+    TS% measures a player's shooting efficiency by taking 2FGs, 3FGs, and FTs into account.
+    
+    Parameters:
+        pts (array-like): Points scored.
+        fga (array-like): Field goal attempts.
+        fta (array-like): Free throw attempts.
+        
+    Returns:
+        array/float: True shooting percentage, or 0.0 if there are no attempts.
     """
     try:
         pts = np.array(pts, dtype=float)
@@ -28,8 +50,16 @@ def calculate_true_shooting_percentage(pts, fga, fta):
 
 def calculate_defensive_impact(stl, blk, dreb):
     """
-    A heuristic defensive score combining steals, blocks, and defensive rebounds.
+    Calculates a heuristic Defensive Impact score.
     Formula: steals * 1.5 + blocks * 1.5 + defensive rebounds * 1.0.
+    
+    Parameters:
+        stl (array-like): Steal count(s).
+        blk (array-like): Block count(s).
+        dreb (array-like): Defensive rebound count(s).
+        
+    Returns:
+        array/float: Defensive impact score, with missing values (NaNs) imputed to 0.0.
     """
     try:
         stl = np.array(stl, dtype=float)
@@ -46,6 +76,14 @@ def calculate_defensive_impact(stl, blk, dreb):
 def calculate_scoring_efficiency(pts, min_per):
     """
     Calculates scoring rate relative to playing time percentage.
+    Formula: points / minutes_percentage.
+    
+    Parameters:
+        pts (array-like): Points scored.
+        min_per (array-like): Percentage of total game minutes played.
+        
+    Returns:
+        array/float: Scoring efficiency score, or 0.0 if playing time is zero.
     """
     try:
         pts = np.array(pts, dtype=float)
@@ -56,10 +94,15 @@ def calculate_scoring_efficiency(pts, min_per):
 
 def calculate_cumulative_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Computes cumulative stats, progression, and running metrics for players (pid).
+    Computes cumulative stats, progression, and running metrics for players (grouped by pid).
     Assumes df has already been sorted by pid and year.
+    
+    Parameters:
+        df (pd.DataFrame): Sorted player dataset.
+        
+    Returns:
+        pd.DataFrame: Computed cumulative feature columns.
     """
-    # Create copies of columns to avoid modifying the original dataframe
     res = pd.DataFrame(index=df.index)
     
     # Calculate season index (1st season, 2nd season, etc.)
@@ -86,7 +129,7 @@ def calculate_cumulative_features(df: pd.DataFrame) -> pd.DataFrame:
     res['cum_mean_usg'] = df.groupby('pid')['usg'].cumsum() / res['career_season_num']
     res['cum_mean_min_per'] = df.groupby('pid')['Min_per'].cumsum() / res['career_season_num']
     
-    # Running maximums
+    # Running maximums (capture player's single-season peaks up to current)
     res['max_bpm_to_date'] = df.groupby('pid')['bpm'].cummax()
     res['max_porpag_to_date'] = df.groupby('pid')['porpag'].cummax()
     res['max_dporpag_to_date'] = df.groupby('pid')['dporpag'].cummax()
@@ -98,7 +141,7 @@ def calculate_cumulative_features(df: pd.DataFrame) -> pd.DataFrame:
     res['max_usg_to_date'] = df.groupby('pid')['usg'].cummax()
     res['max_min_per_to_date'] = df.groupby('pid')['Min_per'].cummax()
     
-    # Year-over-year progression (difference from previous season)
+    # Year-over-year progression (difference from previous season to capture development velocity)
     res['bpm_progression'] = df.groupby('pid')['bpm'].diff().fillna(0.0)
     res['pts_progression'] = df.groupby('pid')['pts'].diff().fillna(0.0)
     res['porpag_progression'] = df.groupby('pid')['porpag'].diff().fillna(0.0)
@@ -108,14 +151,20 @@ def calculate_cumulative_features(df: pd.DataFrame) -> pd.DataFrame:
 def calculate_advanced_recruit_and_conference_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Computes recruiting rank indicators, major conference flags, and per-minute statistics.
+    
+    Parameters:
+        df (pd.DataFrame): Dataset containing recruit rank, conf, and playing time metrics.
+        
+    Returns:
+        pd.DataFrame: Computed recruit and conference indicators.
     """
     res = pd.DataFrame(index=df.index)
     
     # Recruiting rank cleaning
     res['has_rec_rank'] = df['Rec Rank'].notna().astype(float)
-    res['rec_rank_filled'] = df['Rec Rank'].fillna(150.0)
+    res['rec_rank_filled'] = df['Rec Rank'].fillna(150.0)  # Fill missing recruiting ranks with a default baseline (150th)
     
-    # High-major conferences flag loaded from external configurations if available
+    # High-major power conferences flag loaded from external configurations if available
     import os
     external_path = os.path.join("data", "external", "major_conferences.csv")
     if os.path.exists(external_path):
@@ -125,11 +174,12 @@ def calculate_advanced_recruit_and_conference_features(df: pd.DataFrame) -> pd.D
         except Exception:
             major_confs = {'ACC', 'SEC', 'B10', 'B12', 'BE', 'P10', 'P12'}
     else:
+        # Standard fallback power conferences
         major_confs = {'ACC', 'SEC', 'B10', 'B12', 'BE', 'P10', 'P12'}
         
     res['is_major_conf'] = df['conf'].isin(major_confs).astype(float)
     
-    # Per-minute features
+    # Per-minute features (with zero-minute safety epsilon to prevent NaN/Inf)
     mp_safe = np.where(df['mp'] == 0, 1e-5, df['mp'])
     res['pts_per_min'] = df['pts'] / mp_safe
     res['ast_per_min'] = df['ast'] / mp_safe
@@ -138,5 +188,6 @@ def calculate_advanced_recruit_and_conference_features(df: pd.DataFrame) -> pd.D
     res['treb_per_min'] = df['treb'] / mp_safe
     
     return res
+
 
 

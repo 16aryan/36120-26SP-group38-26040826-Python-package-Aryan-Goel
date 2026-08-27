@@ -1,3 +1,9 @@
+"""
+nba_prep Package Initializer
+Exposes core modules and utility functions for cleaning, feature engineering,
+scouting analytics, and model evaluation of collegiate basketball prospects.
+"""
+
 from .cleaning import clean_height, clean_year, calculate_age
 from .features import (
     calculate_ast_tov_ratio,
@@ -10,6 +16,7 @@ from .features import (
 from .analytics import categorize_prospect, generate_scouting_report
 from .evaluation import calculate_model_metrics, estimate_draft_roi
 
+# Define clean namespace exports for the library package
 __all__ = [
     "clean_height",
     "clean_year",
@@ -25,3 +32,4 @@ __all__ = [
     "calculate_model_metrics",
     "estimate_draft_roi",
 ]
+
