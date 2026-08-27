@@ -90,6 +90,11 @@ A GitHub Actions workflow is configured in `.github/workflows/test.yml` to autom
 * Spins up containerized environments across multiple Python versions (`3.10`, `3.11`, `3.12`, `3.13`).
 * Installs dependencies, sets up the package, and executes the entire unit test suite.
 
+#### Pipeline Run Execution & Status
+The CI pipeline has run successfully across multiple iterations and code updates, verifying code standards, package builds, PyPI package structure, and full unit test compliance. Below is the record of the successful workflow runs demonstrating the validation:
+
+![GitHub Actions CI Workflow Runs](docs/pipeline_runs.png)
+
 ### 3. Packaging & Standards Compliance
 * **Pyproject Configuration (`pyproject.toml`)**: Structured with PEP 621 metadata, dependencies (`numpy`, `pandas`), development requirements (`pytest`, `pytest-cov`), and default pytest search paths.
 * **Licensing (`LICENSE`)**: Distributed under the permissive open-source MIT License.
