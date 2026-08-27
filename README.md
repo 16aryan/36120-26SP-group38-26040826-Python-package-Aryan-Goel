@@ -56,24 +56,29 @@ print(report)
 
 ### 1. Robust Unit Test Coverage
 This package is fully verified by 13 unit tests distributed across 5 specialized test suites:
-* **`test_cleaning.py`**: Validates data cleaning utilities under [`src/nba_prep/cleaning.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/cleaning.py).
-  * `clean_height`: Verifies parsing height strings (e.g. `"6-7"` to `79.0` inches) and ensures missing (`None`) or invalid values safely return `NaN`.
-  * `clean_year`: Validates mapping class year abbreviations (`"Fr"`, `"So"`, `"Jr"`, `"Sr"`) and floats/whitespace-padded strings to numeric ranks (`1` to `4`).
-  * `calculate_age`: Confirms calculation of prospect age from birth date strings and season years, handling invalid formats gracefully.
-* **`test_features.py`**: Validates core basketball features under [`src/nba_prep/features.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/features.py).
-  * `calculate_ast_tov_ratio`: Tests assist-to-turnover ratio logic with division-by-zero protection (applying a $1e-5$ epsilon).
-  * `calculate_true_shooting_percentage`: Verifies standard scoring efficiency formulas (True Shooting % accounting for FGA and FTA).
-  * `calculate_defensive_impact`: Checks weighted defensive impact metrics (combining steals, blocks, and defensive rebounds).
-  * `calculate_scoring_efficiency`: Tests production scaling relative to playing minutes percentage.
-  * `calculate_advanced_recruit_and_conference_features`: Validates filling high school recruiting ranks, setting binary index flags, flagging Power Conferences, and computing per-minute stats.
-* **`test_cumulative.py`**: Validates historical career progression logic under [`src/nba_prep/features.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/features.py).
-  * `calculate_cumulative_features`: Tests grouped aggregation by Player ID (`pid`) over successive calendar years to calculate running career counts, running season averages (e.g., Box Plus-Minus, usage rates), seasonal progression deltas, and peak metrics to date.
-* **`test_analytics.py`**: Validates scouting reports and tier classifications under [`src/nba_prep/analytics.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/analytics.py).
-  * `categorize_prospect`: Tests categorization of draft prospects into four distinct talent tiers (Franchise Core, Rotation Contributor, G-League, High Risk) based on model probabilities.
-  * `generate_scouting_report`: Confirms correct generation of text-based scouting profile reports with qualitative descriptors based on on-court statistics.
-* **`test_evaluation.py`**: Validates model evaluation and business metrics under [`src/nba_prep/evaluation.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/evaluation.py).
-  * `calculate_model_metrics`: Tests standard classification rankings (AUPRC, AUROC, base rate) and locates the F1-optimizing threshold.
-  * `estimate_draft_roi`: Verifies business metrics like draft success rates, salary cap space wasted on busts, and scouting hours/travel saved.
+* **`test_cleaning.py`** — Validates basic data cleaning utility functions under [`src/nba_prep/cleaning.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/cleaning.py):
+  * **`clean_height`**: Verifies that standard height strings (e.g. `"6-7"` to `79.0` and `"6-2"` to `74.0` inches) are correctly parsed, and checks that missing (`None`), malformed strings (e.g., `"invalid"`), or floats (e.g., `6.7`) return `NaN`.
+  * **`clean_year`**: Checks the mapping of college year codes (`"Fr" -> 1`, `"So" -> 2`, `"Jr" -> 3`, `"Sr" -> 4`), conversion of numeric strings (e.g., `" 2.0 "` to integer `2`), and ensures invalid year codes return `NaN`.
+  * **`calculate_age`**: Validates calculation of a prospect's age during a college season from birthdate strings (e.g. `"1997-10-15"` in `2020` yields `23.0`), and asserts that malformed date strings, `None` inputs, or missing season years return `NaN`.
+* **`test_features.py`** — Validates advanced player feature math under [`src/nba_prep/features.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/features.py):
+  * **`calculate_ast_tov_ratio`**: Tests standard assist-to-turnover ratio computations (e.g., `10` assists, `2` turnovers -> `5.0`), and verifies division-by-zero protection (e.g., `10` assists, `0` turnovers uses a default $1e-5$ epsilon, yielding `1,000,000.0`).
+  * **`calculate_true_shooting_percentage`**: Asserts that True Shooting Percentage calculations match standard basketball analytics formula ($PTS / (2 \times (FGA + 0.44 \times FTA))$).
+  * **`calculate_defensive_impact`**: Checks custom weighted defensive contributions ($1.5 \times Steals + 1.5 \times Blocks + 1.0 \times DefRebounds$).
+  * **`calculate_scoring_efficiency`**: Asserts points production scaled by playing minutes percentage ($PTS / Min\%$).
+  * **`calculate_advanced_recruit_and_conference_features`**: Uses a mock DataFrame to verify features like imputing missing recruiting ranks with a default average (`150.0`), setting binary recruiting rank existence indicators, flagging Power Conferences (e.g. ACC, Big Ten) vs mid-majors (e.g. WAC), and computing per-minute production rates.
+* **`test_cumulative.py`** — Validates historical player-level tracking logic under [`src/nba_prep/features.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/features.py):
+  * **`calculate_cumulative_features`**: Feeds a multi-season DataFrame for two distinct players (pid 1 and 2) to test grouped career historical progression. Asserts that the function correctly tracks sequential season counts (`career_season_num`), running totals (`cum_GP`, `cum_pts`), running averages (`cum_mean_bpm`, `cum_mean_usg`), career peak values to date (`max_pts_to_date`, `max_min_per_to_date`), and season-over-season progression deltas (`pts_progression`).
+* **`test_analytics.py`** — Validates classification and descriptive scouting card logic under [`src/nba_prep/analytics.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/analytics.py):
+  * **`categorize_prospect`**: Validates player draft prospects categorization into four discrete scouting categories:
+    * *Tier 1: Franchise Core (Elite)* for probabilities >= 0.70
+    * *Tier 2: Rotation Contributor (Moderate)* for 0.40 <= P < 0.70
+    * *Tier 3: G-League / Development Project (Low-Moderate)* for 0.10 <= P < 0.40
+    * *Tier 4: High Risk / Undrafted Profile (Very Low)* for P < 0.10
+    * Asserts bounds checking for out-of-range probabilities (1.5 -> "Invalid Probability") and type mismatches.
+  * **`generate_scouting_report`**: Validates the automated text card generator. Verifies that report descriptions contain appropriate qualitative descriptors based on statistics (e.g., asserts that an elite player report contains "Elite collegiate contributor", "Exceptionally efficient", and "Five-star high school recruit", while a bench player report prints "Below-average impact" and "Highly inefficient scorer").
+* **`test_evaluation.py`** — Validates technical scoring metrics and business financial ROI outputs under [`src/nba_prep/evaluation.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/evaluation.py):
+  * **`calculate_model_metrics`**: Confirms that model metric helper computes AUPRC, AUROC, base rate, and the optimal classification threshold (based on maximizing the F1-score) for a simulated prediction array.
+  * **`estimate_draft_roi`**: Validates front-office financial models. Sets a decision threshold of 0.5 on a mock group of 10 prospects to assert total players drafted, successes, busts, draft success rate (e.g. 60.0% vs base rate of 30.0%), wasted salary cap dollars (e.g., 2 busts * $5,000,000 = $10,000,000), and percentage of travel and scouting hours saved (e.g. 50.0%). Also checks handling of high thresholds resulting in zero prospects drafted.
 
 To execute tests locally, run:
 ```bash
