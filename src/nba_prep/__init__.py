@@ -16,8 +16,11 @@ from .features import (
 from .analytics import categorize_prospect, generate_scouting_report
 from .evaluation import calculate_model_metrics, estimate_draft_roi
 
+__version__ = "0.3.3"
+
 # Define clean namespace exports for the library package
 __all__ = [
+    "__version__",
     "clean_height",
     "clean_year",
     "calculate_age",

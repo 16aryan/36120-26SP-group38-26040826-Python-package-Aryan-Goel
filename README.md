@@ -1,6 +1,6 @@
 # nba_prep
 
-[![TestPyPI](https://img.shields.io/badge/TestPyPI-v0.3.2-blue.svg?logo=pypi&logoColor=white)](https://test.pypi.org/project/nba-prep-26040826/0.3.2/)
+[![TestPyPI](https://img.shields.io/badge/TestPyPI-v0.3.3-blue.svg?logo=pypi&logoColor=white)](https://test.pypi.org/project/nba-prep-26040826/0.3.3/)
 [![Tests Status](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel/actions/workflows/test.yml/badge.svg)](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel/actions)
 
 `nba_prep` is a Python utility package designed to clean and engineer features for predicting NBA career longevity.
@@ -130,7 +130,7 @@ To set up the project environment and install all required machine learning libr
 ```bash
 pip install -r requirements.txt
 ```
-*(Alternatively, install `nba_prep` directly from TestPyPI: `pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nba_prep_26040826==0.3.2`)*
+*(Alternatively, install `nba_prep` directly from TestPyPI: `pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nba_prep_26040826==0.3.3`)*
 
 ### 2. Preprocess Raw Data & Generate Processed CSVs
 To generate all fresh, cleaned, and feature-engineered datasets from raw inputs:

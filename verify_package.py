@@ -6,7 +6,7 @@ from nba_prep import (
     estimate_draft_roi
 )
 
-print("--- Verifying Python Package: nba_prep (v0.3.2) ---")
+print("--- Verifying Python Package: nba_prep (v0.3.3) ---")
 
 # 1. Clean height data
 height_inches = clean_height("6-7")
