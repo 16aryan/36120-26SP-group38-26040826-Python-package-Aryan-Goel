@@ -21,8 +21,8 @@ def calculate_ast_tov_ratio(ast, tov):
     try:
         ast = np.array(ast, dtype=float)
         tov = np.array(tov, dtype=float)
-        # For zero turnovers, divide by 1e-5 (or return a very high ratio) to avoid division by zero
-        return np.where(tov == 0, ast / 1e-5, ast / tov)
+        safe_tov = np.where(tov == 0, 1e-5, tov)
+        return np.where(tov == 0, ast / 1e-5, ast / safe_tov)
     except Exception:
         return np.nan
 
@@ -44,7 +44,8 @@ def calculate_true_shooting_percentage(pts, fga, fta):
         fga = np.array(fga, dtype=float)
         fta = np.array(fta, dtype=float)
         denom = 2.0 * (fga + 0.44 * fta)
-        return np.where(denom == 0, 0.0, pts / denom)
+        safe_denom = np.where(denom == 0, 1.0, denom)
+        return np.where(denom == 0, 0.0, pts / safe_denom)
     except Exception:
         return np.nan
 
@@ -88,7 +89,8 @@ def calculate_scoring_efficiency(pts, min_per):
     try:
         pts = np.array(pts, dtype=float)
         min_per = np.array(min_per, dtype=float)
-        return np.where(min_per == 0, 0.0, pts / min_per)
+        safe_min = np.where(min_per == 0, 1.0, min_per)
+        return np.where(min_per == 0, 0.0, pts / safe_min)
     except Exception:
         return np.nan
 
