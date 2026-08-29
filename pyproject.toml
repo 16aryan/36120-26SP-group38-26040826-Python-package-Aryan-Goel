@@ -17,6 +17,10 @@ dependencies = [
     "scikit-learn"
 ]
 
+[project.urls]
+Homepage = "https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel"
+Repository = "https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel"
+
 [project.optional-dependencies]
 dev = [
     "pytest",
