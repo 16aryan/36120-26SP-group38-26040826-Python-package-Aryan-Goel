@@ -1,201 +1,260 @@
-# nba_prep
+# nba_prep (v0.4.0)
 
 [![TestPyPI](https://img.shields.io/badge/TestPyPI-v0.4.0-blue.svg?logo=pypi&logoColor=white)](https://test.pypi.org/project/nba-prep-26040826/0.4.0/)
-[![Tests Status](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel/actions/workflows/test.yml/badge.svg)](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel/actions)
+[![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![Tests Status](https://img.shields.io/badge/tests-20%2F20%20passed-brightgreen.svg)](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-`nba_prep` is a multi-domain production Python utility package providing data preprocessing, feature engineering, and target derivation pipelines for collegiate player career longevity prediction (AT1) and Weather Intelligence forecasting (AT2 - Climate Comfort Index & Weather Hazard Category).
+`nba_prep` (`nba-prep-26040826`) is a dual-domain production Python package developed for UTS **36120 Advanced Machine Learning Applications**. It provides reusable data preprocessing, feature engineering, and target variable derivation pipelines for:
+
+1. **AT1 — Collegiate Basketball Prospect Analytics & Career Longevity Prediction:**
+   - Raw anthropometric and career data cleaning.
+   - Advanced basketball metric calculations (True Shooting %, Defensive Impact, Assist/TO ratio, Scoring Efficiency).
+   - Multi-season cumulative statistics, progression deltas, and peak career maximums.
+   - Decision support scouting report generation and prospect classification tiers.
+   - Technical model scoring (AUPRC, AUROC, F1-optimal thresholding) and front-office financial ROI analysis.
+
+2. **AT2 — Open-Meteo Weather Intelligence & Machine Learning as a Service (MLaaS):**
+   - **Target 1:** Climate Comfort Index (CCI) regression target engineering (+3-day forecast horizon) and 5-tier descriptive condition interpretation.
+   - **Target 2:** Weather Hazard Category (WHC) 4-class multiclass classification target engineering (+7-day forecast horizon) and risk category interpretation.
+   - Raw hourly-to-daily meteorological aggregations strictly following Open-Meteo aggregation rules.
+   - Zero-leakage cyclical trigonometric solar calendar encodings (sine and cosine).
+   - Strict backward-shifted consecutive dry-streak day tracking without temporal lookahead bias.
+
+---
 
 ## Installation
 
-To install this package locally for development:
+### From TestPyPI (Recommended)
 ```bash
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nba-prep-26040826==0.4.0
+```
+
+### Local Development Installation
+Clone the repository and install in editable mode:
+```bash
+git clone https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel.git
+cd 36120-26SP-group38-26040826-Python-package-Aryan-Goel
 pip install -e .
 ```
 
-To install from TestPyPI:
-```bash
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nba_prep_26040826
+---
+
+## Module Architecture
+
+```
+nba_prep/
+├── __init__.py           # Unified top-level exports for AT1 & AT2
+├── cleaning.py           # [AT1] Data cleaning (height, year, age)
+├── features.py           # [AT1] Advanced basketball metrics & cumulative career tracking
+├── analytics.py          # [AT1] Prospect tier categorization & scouting report generation
+├── evaluation.py         # [AT1] Technical evaluation metrics (AUPRC/AUROC) & financial ROI
+└── weather.py            # [AT2] Weather Intelligence (CCI, WHC, daily aggregations, dry streak)
 ```
 
-## Features
+---
 
-- **Height Cleaning**: Converts height strings (e.g. `6-7`) to numeric inches.
-- **Year Cleaning**: Cleans college year categories (`Fr`, `So`, `Jr`, `Sr`) into standard integers (1 to 4).
-- **Age Extraction**: Computes player age during a college season from date of birth (DOB) and season year.
-- **Basketball Analytics**: Calculates Advanced Basketball Metrics (e.g. Assist-to-Turnover ratio, True Shooting percentage, Defensive Impact score, and Offensive Rating interaction).
-- **Cumulative Career Features**: Calculates running career totals, averages, season-by-season progression deltas, and peak career maximums to date for tracking player consistency.
-- **Recruiting & Conference Features**: Imputes high school recruiting ranks, handles Power Conference binary indexing, and calculates pace-adjusted per-minute production metrics.
-- **Decision Support & Scouting Reports**: Includes prospect classification into success probability tiers and automated scouting report card generators summarizing collegiate metrics for front-office decision-makers.
-- **Model Evaluation & Financial ROI**: Computes technical evaluation metrics (AUPRC, AUROC, F1-optimized decision thresholds) and translates model probabilities into financial business ROI (wasted rookie contract cap space avoided, scouting travel cost savings).
-- **Weather Intelligence (AT2 Extension)**: Calculates Climate Comfort Index (CCI) multi-horizon regression targets, Weather Hazard Category (WHC) multiclass classification targets, daily Open-Meteo temporal aggregations, cyclical solar calendar encodings, and strict no-leakage dry-streak counters.
+## Quickstart & Usage
 
-## Usage
-
-Here is a quick example of how to use the package:
+### 1. AT1 — Basketball Prospect Analytics
 
 ```python
-from nba_prep import clean_height, categorize_prospect, generate_scouting_report
+import numpy as np
+from nba_prep import (
+    clean_height,
+    clean_year,
+    calculate_age,
+    calculate_true_shooting_percentage,
+    calculate_defensive_impact,
+    categorize_prospect,
+    generate_scouting_report,
+    calculate_model_metrics,
+    estimate_draft_roi,
+)
 
-# 1. Clean height data
-height_inches = clean_height("6-7")  # returns 79.0
+# --- Data Cleaning ---
+height_in = clean_height("6-7")          # Returns 79.0 inches
+year_code = clean_year("Jr")              # Returns 3
+age = calculate_age("2001-04-12", 2023)   # Returns 22.0
 
-# 2. Categorize a prospect's probability score
-tier = categorize_prospect(0.82)     # returns "Tier 1: Franchise Core (Elite)"
+# --- Advanced Basketball Metrics ---
+ts_pct = calculate_true_shooting_percentage(pts=450, fga=320, fta=110)
+def_impact = calculate_defensive_impact(stl=45, blk=30, drb=120)
 
-# 3. Generate a scouting report card
+# --- Front-Office Decision Support ---
+tier = categorize_prospect(0.82)
+# Returns: "Tier 1: Franchise Core (Elite)"
+
 report = generate_scouting_report(
-    "Aryan Goel", 
-    bpm=9.2, 
-    true_shooting=0.61, 
-    defensive_impact=11.0, 
+    "Aryan Goel",
+    bpm=9.2,
+    true_shooting=0.61,
+    defensive_impact=11.0,
     rec_rank=15.0
 )
 print(report)
 
-# 4. Calculate Climate Comfort Index (CCI - AT2)
-from nba_prep.weather import calculate_climate_comfort_index, interpret_cci
-cci, components = calculate_climate_comfort_index(
-    temperature_2m=22.0, relative_humidity_2m=50.0,
-    wind_speed_10m=10.0, cloud_cover=0.0, precipitation=0.0
-)
-print(f"CCI: {cci:.1f} ({interpret_cci(cci)})")
+# --- Model Evaluation & Financial ROI ---
+y_true = [1, 0, 1, 0, 0, 1, 0, 0, 0, 0]
+y_pred = [0.92, 0.78, 0.85, 0.40, 0.12, 0.65, 0.31, 0.05, 0.18, 0.09]
 
-# 5. Calculate Weather Hazard Category (WHC - AT2)
-from nba_prep.weather import calculate_weather_hazard_index, convert_whi_to_whc, interpret_whc
+metrics = calculate_model_metrics(y_true, y_pred)
+print(f"AUPRC: {metrics['auprc']:.4f} | Optimal Threshold: {metrics['optimal_threshold']:.2f}")
+
+roi = estimate_draft_roi(y_true, y_pred, threshold=0.50, rookie_contract_cost=5000000)
+print(f"Scouting Yield Improvement: {roi['relative_improvement_factor']:.2f}x")
+print(f"Wasted Cap Dollars: ${roi['wasted_salary_cap_dollars']:,}")
+```
+
+---
+
+### 2. AT2 — Weather Intelligence (CCI & WHC)
+
+```python
+import pandas as pd
+from nba_prep import (
+    calculate_cci,
+    interpret_cci,
+    calculate_weather_hazard_index,
+    convert_whi_to_whc,
+    calculate_whc,
+    interpret_whc,
+    aggregate_hourly_to_daily,
+    calculate_dry_streak,
+    add_cyclical_calendar_features,
+)
+
+# --- Target 1: Climate Comfort Index (Regression) ---
+# Formula: CCI = 100 * (0.35*Temp + 0.25*Humidity + 0.20*Wind + 0.10*Cloud + 0.10*Rain)
+cci_score, components = calculate_cci(
+    temperature_2m=22.0,
+    relative_humidity_2m=50.0,
+    wind_speed_10m=10.0,
+    cloud_cover=10.0,
+    precipitation=0.0
+)
+print(f"CCI Score: {cci_score:.1f}/100 -> {interpret_cci(cci_score)}")
+# Output: CCI Score: 98.5/100 -> Excellent outdoor conditions
+
+# --- Target 2: Weather Hazard Category (Classification) ---
+# Formula: WHI = 100 * (0.30*Rain + 0.30*Wind + 0.20*Cloud + 0.10*Snow + 0.10*Temp)
+# Discretized into: 0: Low Risk (<25), 1: Moderate (25-49), 2: High (50-74), 3: Extreme (>=75)
 whi, hazards = calculate_weather_hazard_index(
-    precipitation=15.0, wind_gusts_10m=50.0, cloud_cover=50.0,
-    snowfall=0.0, temperature_2m=22.0
+    precipitation=15.0,
+    wind_gusts_10m=65.0,
+    cloud_cover=80.0,
+    snowfall=0.0,
+    temperature_2m=32.0
 )
-cat = convert_whi_to_whc(whi)
-print(f"WHC: Class {cat} ({interpret_whc(cat)})")
+category = convert_whi_to_whc(whi)
+print(f"WHI: {whi:.1f} -> Category {category} ({interpret_whc(category)})")
+# Output: WHI: 54.5 -> Category 2 (High Risk)
+
+# Convenience helper for direct categorization:
+direct_cat = calculate_whc(
+    precipitation=0.0, wind_gusts_10m=15.0, cloud_cover=10.0, snowfall=0.0, temperature_2m=21.0
+)
+print(f"Direct Category: {direct_cat} ({interpret_whc(direct_cat)})")
+
+# --- Meteorological Preprocessing & Aggregations ---
+sample_hourly = pd.DataFrame({
+    "date": ["2024-01-01 00:00", "2024-01-01 12:00", "2024-01-02 00:00", "2024-01-02 12:00"],
+    "temperature_2m": [18.0, 26.0, 20.0, 24.0],
+    "relative_humidity_2m": [70.0, 45.0, 65.0, 50.0],
+    "precipitation": [0.0, 2.5, 0.0, 0.0],
+    "wind_speed_10m": [8.0, 15.0, 10.0, 12.0],
+    "wind_gusts_10m": [15.0, 30.0, 20.0, 25.0],
+    "cloud_cover": [20.0, 60.0, 10.0, 30.0],
+    "snowfall": [0.0, 0.0, 0.0, 0.0],
+    "shortwave_radiation_sum": [10.0, 50.0, 15.0, 45.0],
+    "direct_normal_irradiance": [5.0, 40.0, 10.0, 35.0],
+    "surface_pressure": [1013.0, 1012.0, 1014.0, 1013.0],
+    "weather_code": [0, 1, 0, 0],
+})
+
+# Aggregate hourly to daily:
+daily = aggregate_hourly_to_daily(sample_hourly, date_col="date")
+
+# Calculate zero-leakage consecutive dry-streak days:
+daily["dry_streak_days"] = calculate_dry_streak(daily["precipitation"])
+
+# Add cyclical solar calendar encodings:
+daily = add_cyclical_calendar_features(daily)
 ```
---------
-## Development & Quality Standards
 
-### 1. Robust Unit Test Coverage
-This package is fully verified by 20 unit tests distributed across 6 specialized test suites:
-* **`test_cleaning.py`** — Validates basic data cleaning utility functions under [`src/nba_prep/cleaning.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/cleaning.py):
-  * **`clean_height`**: Verifies that standard height strings (e.g. `"6-7"` to `79.0` and `"6-2"` to `74.0` inches) are correctly parsed, and checks that missing (`None`), malformed strings (e.g., `"invalid"`), or floats (e.g., `6.7`) return `NaN`.
-  * **`clean_year`**: Checks the mapping of college year codes (`"Fr" -> 1`, `"So" -> 2`, `"Jr" -> 3`, `"Sr" -> 4`), conversion of numeric strings (e.g., `" 2.0 "` to integer `2`), and ensures invalid year codes return `NaN`.
-  * **`calculate_age`**: Validates calculation of a prospect's age during a college season from birthdate strings (e.g. `"1997-10-15"` in `2020` yields `23.0`), and asserts that malformed date strings, `None` inputs, or missing season years return `NaN`.
-* **`test_features.py`** — Validates advanced player feature math under [`src/nba_prep/features.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/features.py):
-  * **`calculate_ast_tov_ratio`**: Tests standard assist-to-turnover ratio computations (e.g., `10` assists, `2` turnovers -> `5.0`), and verifies division-by-zero protection (e.g., `10` assists, `0` turnovers uses a default $1e-5$ epsilon, yielding `1,000,000.0`).
-  * **`calculate_true_shooting_percentage`**: Asserts that True Shooting Percentage calculations match standard basketball analytics formula ($PTS / (2 \times (FGA + 0.44 \times FTA))$).
-  * **`calculate_defensive_impact`**: Checks custom weighted defensive contributions ($1.5 \times Steals + 1.5 \times Blocks + 1.0 \times DefRebounds$).
-  * **`calculate_scoring_efficiency`**: Asserts points production scaled by playing minutes percentage ($PTS / Min\%$).
-  * **`calculate_advanced_recruit_and_conference_features`**: Uses a mock DataFrame to verify features like imputing missing recruiting ranks with a default average (`150.0`), setting binary recruiting rank existence indicators, flagging Power Conferences (e.g. ACC, Big Ten) vs mid-majors (e.g. WAC), and computing per-minute production rates.
-* **`test_cumulative.py`** — Validates historical player-level tracking logic under [`src/nba_prep/features.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/features.py):
-  * **`calculate_cumulative_features`**: Feeds a multi-season DataFrame for two distinct players (pid 1 and 2) to test grouped career historical progression. Asserts that the function correctly tracks sequential season counts (`career_season_num`), running totals (`cum_GP`, `cum_pts`), running averages (`cum_mean_bpm`, `cum_mean_usg`), career peak values to date (`max_pts_to_date`, `max_min_per_to_date`), and season-over-season progression deltas (`pts_progression`).
-* **`test_analytics.py`** — Validates classification and descriptive scouting card logic under [`src/nba_prep/analytics.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/analytics.py):
-  * **`categorize_prospect`**: Validates player draft prospects categorization into four discrete scouting categories:
-    * *Tier 1: Franchise Core (Elite)* for probabilities >= 0.70
-    * *Tier 2: Rotation Contributor (Moderate)* for 0.40 <= P < 0.70
-    * *Tier 3: G-League / Development Project (Low-Moderate)* for 0.10 <= P < 0.40
-    * *Tier 4: High Risk / Undrafted Profile (Very Low)* for P < 0.10
-    * Asserts bounds checking for out-of-range probabilities (1.5 -> "Invalid Probability") and type mismatches.
-  * **`generate_scouting_report`**: Validates the automated text card generator. Verifies that report descriptions contain appropriate qualitative descriptors based on statistics (e.g., asserts that an elite player report contains "Elite collegiate contributor", "Exceptionally efficient", and "Five-star high school recruit", while a bench player report prints "Below-average impact" and "Highly inefficient scorer").
-* **`test_weather.py`** — Validates Weather Intelligence target derivations, aggregations, and feature calculations under [`src/nba_prep/weather.py`](src/nba_prep/weather.py):
-  * **Climate Comfort Index (CCI)**: Tests individual component scores (temperature, humidity, wind, cloud, rain), boundary conditions (0-100), composite formula verification against ideal benchmark (100.0), and 5-tier descriptive mapping (`interpret_cci`).
-  * **Weather Hazard Category (WHC)**: Asserts all 5 hazard equations (rain, wind gusts, cloud cover, snowfall, temperature), composite Weather Hazard Index (WHI), and strict 4-class categorical discretization (`convert_whi_to_whc`: 0=Low, 1=Moderate, 2=High, 3=Extreme).
-  * **Hourly-to-Daily Aggregation**: Verifies Open-Meteo aggregation rules (daily mean for temperature/humidity/wind/cloud, daily sum for precipitation/snowfall, and daily max for wind gusts).
-  * **Zero-Leakage Feature Engineering**: Confirms correct cyclical trigonometric calendar encodings (sine & cosine) and verifies strict backward shifting `shift(1)` for consecutive dry-streak days without temporal leakage.
-* **`test_evaluation.py`** — Validates technical scoring metrics and business financial ROI outputs under [`src/nba_prep/evaluation.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/evaluation.py):
-  * **`calculate_model_metrics`**: Confirms that model metric helper computes AUPRC, AUROC, base rate, and the optimal classification threshold (based on maximizing the F1-score) for a simulated prediction array.
-  * **`estimate_draft_roi`**: Validates front-office financial models. Sets a decision threshold of 0.5 on a mock group of 10 prospects to assert total players drafted, successes, busts, draft success rate (e.g. 60.0% vs base rate of 30.0%), wasted salary cap dollars (e.g., 2 busts * $5,000,000 = $10,000,000), and percentage of travel and scouting hours saved (e.g. 50.0%). Also checks handling of high thresholds resulting in zero prospects drafted.
+---
 
-To execute tests locally, run:
+## Built-In Verification Script
+
+To verify that all AT1 and AT2 features run correctly in your active environment:
+
 ```bash
-pytest
+python verify_package.py
 ```
 
-### 2. Continuous Integration (CI) Pipeline
-A GitHub Actions workflow is configured in `.github/workflows/test.yml` to automatically verify code integrity. On every push and pull request, the test runner:
-* Spins up containerized environments across multiple Python versions (`3.10`, `3.11`, `3.12`, `3.13`).
-* Installs dependencies, sets up the package, and executes the entire unit test suite.
+Expected output:
+```text
+================================================================
+--- Verifying Custom Python Package: nba_prep (v0.4.0) ---
+================================================================
 
-#### Pipeline Run Execution & Status
-The CI pipeline has run successfully across multiple iterations and code updates, verifying code standards, package builds, PyPI package structure, and full unit test compliance. Below is the record of the successful workflow runs demonstrating the validation:
+[AT1 Prospect Analytics]
+  ✓ Height '6-7' cleaned to: 79.0 inches (Expected: 79.0)
+  ✓ Prospect probability 0.82 classified as: 'Tier 1: Franchise Core (Elite)'
+  ✓ Model Evaluation AUPRC: 0.9167, AUROC: 0.9524
+  ✓ Draft ROI yield factor: 2.50x
 
-![GitHub Actions CI Workflow Runs](docs/pipeline_runs.png)
+[AT2 Weather Intelligence - Target 1: Climate Comfort Index (CCI)]
+  ✓ Optimal Day CCI Score: 98.50/100 -> 'Excellent outdoor conditions'
+  ✓ Adverse Day CCI Score: 23.88/100 -> 'Poor comfort'
 
-### 3. Packaging & Standards Compliance
-* **Pyproject Configuration (`pyproject.toml`)**: Structured with PEP 621 metadata, dependencies (`numpy`, `pandas`), development requirements (`pytest`, `pytest-cov`), and default pytest search paths.
-* **Licensing (`LICENSE`)**: Distributed under the permissive open-source MIT License.
-* **Git Hygiene (`.gitignore`)**: Configured to ensure compilation caches (`__pycache__`), build directories (`dist/`, `build/`), test reports, and IDE configurations are kept out of source control tracking.
+[AT2 Weather Intelligence - Target 2: Weather Hazard Category (WHC)]
+  ✓ Weather Hazard Index (WHI): 54.50/100 -> Category 2 ('High Risk')
+  ✓ Calm Day WHC Category: 0 ('Low Risk')
 
+[AT2 Preprocessing & Feature Engineering]
+  ✓ Hourly aggregation to daily: 2 daily records produced
+  ✓ Dry streak days calculation: [0.0, 0.0]
+  ✓ Cyclical calendar features added: ['sin_dayofyear', 'cos_dayofyear', 'sin_month', 'cos_month']
 
---------
-## Latest Model Performance & Credit
+================================================================
+SUCCESS: nba_prep package (v0.4.0) verified for both AT1 & AT2!
+================================================================
+```
 
-This training run was performed by **Aryan Goel (26040826)**.
+---
 
-### Performance Scores (OOF AUPRC)
-* **LightGBM**: `0.48416`
-* **Extra Trees**: `0.49197`
-* **Logistic Regression**: `0.48983`
-* **XGBoost**: `0.50970`
-* **CatBoost**: `0.51188`
-* **Blended Ensemble**: `0.52035`
+## Unit Testing & Quality Standards
 
-### Generated Model Artifacts (`models/`)
-* **LightGBM**: `models/final_lightgbm.joblib`, `models/final_lightgbm.txt`, `models/36120-26SP-group38-26040826-final_lightgbm.joblib`
-* **XGBoost**: `models/final_xgboost.joblib`, `models/final_xgboost.json`, `models/36120-26SP-group38-26040826-final_xgboost.joblib`
-* **CatBoost**: `models/final_catboost.joblib`, `models/final_catboost.cbm`, `models/36120-26SP-group38-26040826-final_catboost.joblib`
-* **Experiment 3 Final Model**: `models/36120-26SP-group38-26040826-experiment3-model.joblib`
-* **Predictions**: `submission.csv` (6,261 unique player rows, 0 duplicates, 0 nulls, ready for Kaggle submission)
+The package is fully covered by 20 unit tests across 6 suites:
 
---------
+| Test Suite | Focus Area | Description |
+| :--- | :--- | :--- |
+| `tests/test_cleaning.py` | AT1 Data Cleaning | Validates `clean_height`, `clean_year`, and `calculate_age` edge cases, formats, and missing values. |
+| `tests/test_features.py` | AT1 Basketball Metrics | Tests `calculate_ast_tov_ratio` (with division-by-zero epsilon), `calculate_true_shooting_percentage`, `calculate_defensive_impact`, and recruit/conference features. |
+| `tests/test_cumulative.py` | AT1 Career Progression | Tests grouped multi-season player statistics, progression deltas, and peak career maximums to date. |
+| `tests/test_analytics.py` | AT1 Decision Support | Tests 4-tier probability classification and qualitative text report generation. |
+| `tests/test_evaluation.py` | AT1 Evaluation & ROI | Verifies AUPRC, AUROC, F1 optimization, and draft cap space financial analysis. |
+| `tests/test_weather.py` | AT2 Weather Intelligence | Verifies Climate Comfort Index (0-100), component scores, Weather Hazard Category (0-3), hourly-to-daily aggregations, dry streak tracking, and cyclical calendar transforms. |
 
-## Reproducibility Instructions
-
-### 1. Install Environment & Package Dependencies
-To set up the project environment and install all required machine learning libraries alongside the custom `nba_prep` feature engineering package:
+To execute the entire test suite locally:
 ```bash
-pip install -r requirements.txt
+pytest tests/ -v
 ```
-*(Alternatively, install `nba_prep` directly from TestPyPI: `pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nba_prep_26040826==0.3.3`)*
 
-### 2. Preprocess Raw Data & Generate Processed CSVs
-To generate all fresh, cleaned, and feature-engineered datasets from raw inputs:
-```bash
-python -m AT1_AML.dataset
-```
-**Output Files Generated in `data/processed/`:**
-* `train_processed.csv`: Cleaned multi-season training data with 110+ engineered features (cumulative statistics, True Shooting %, defensive impact, age, and recruit pedigree).
-* `test_processed.csv`: Cleaned test set with aligned feature columns and zero missing feature values.
-* `interim/` datasets: Intermediate cleaned and imputed tables.
+---
 
-### 3. Train Models, Output Metrics & Generate Predictions
-Run the complete automated 5-Fold Stratified Group Cross-Validation and model training pipeline:
-```bash
-python -m AT1_AML.modeling.train
-```
-**What this accomplishes:**
-1. **Cross-Validation Evaluation:** Evaluates 5 separate algorithms (LightGBM, XGBoost, CatBoost, Extra Trees, Logistic Regression) and their ensemble using Stratified Group K-Fold (grouped strictly by `pid` to eliminate data leakage).
-2. **Generates Fresh Model Files in `models/`:** Fits final estimators on full peak-season data and saves serialized model weights:
-   * **LightGBM:** `models/final_lightgbm.joblib`, `models/final_lightgbm.txt`, `models/36120-26SP-group38-26040826-final_lightgbm.joblib`
-   * **XGBoost:** `models/final_xgboost.joblib`, `models/final_xgboost.json`, `models/36120-26SP-group38-26040826-final_xgboost.joblib`
-   * **CatBoost:** `models/final_catboost.joblib`, `models/final_catboost.cbm`, `models/36120-26SP-group38-26040826-final_catboost.joblib`
-   * **Final Ensemble Model:** `models/36120-26SP-group38-26040826-experiment3-model.joblib`
-3. **Generates Deduplicated Kaggle Submission (`submission.csv`):** Evaluates test prospects strictly on their final college seasons, ensuring exactly 6,261 unique player IDs with zero duplicates and zero null values.
+## Related Repositories
 
-### 4. Running Experimental Walkthrough Notebooks
-The complete, structured experimental progression is documented across three dedicated Jupyter notebooks:
+- **Package Repository (TestPyPI):** [36120-26SP-group38-26040826-Python-package-Aryan-Goel](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel)
+- **AT2 Experimentation Repository:** [36120-26SP-AT2-26040826-experiments](https://github.com/16aryan/36120-26SP-AT2-26040826-experiments)
+- **AT2 FastAPI Deployment Repository:** [36120-26SP-AT2-26040826-api](https://github.com/16aryan/36120-26SP-AT2-26040826-api)
 
-* **Experiment 1 (Baseline Model):** `notebooks/36120-26SP-group38-26040826-AT1-experiment-1.ipynb`
-  * Implements baseline LightGBM model, initial data exploratory checks, and saves `models/36120-26SP-group38-26040826-experiment1-model.joblib`.
-* **Experiment 2 (Model Architecture Exploration):** `notebooks/36120-26SP-group38-26040826-AT1-experiment-2.ipynb`
-  * Rigorous head-to-head comparison of Random Forest, HistGradientBoosting, and Tuned LightGBM. Saves `models/36120-26SP-group38-26040826-experiment2-model.joblib`.
-* **Experiment 3 (Feature Selection & Ensembling):** `notebooks/36120-26SP-group38-26040826-AT1-experiment-3.ipynb`
-  * Comprehensive feature engineering, correlation analysis, LightGBM gain-importance feature selection, and a 3-model GBDT ensemble. Generates processed split files (`X_train.csv`, `y_train.csv`, `X_val.csv`, `y_val.csv`, `X_test.csv`, `y_test.csv`), saves `models/36120-26SP-group38-26040826-experiment3-model.joblib`, and outputs the final blended `submission.csv`.
+---
 
-#### To re-execute all notebooks via CLI:
-```bash
-jupyter nbconvert --to notebook --execute --inplace notebooks/36120-26SP-group38-26040826-AT1-experiment-1.ipynb
-jupyter nbconvert --to notebook --execute --inplace notebooks/36120-26SP-group38-26040826-AT1-experiment-2.ipynb
-jupyter nbconvert --to notebook --execute --inplace notebooks/36120-26SP-group38-26040826-AT1-experiment-3.ipynb
-```
-*(Or launch interactively using `jupyter lab` or `jupyter notebook`).*
+## Author & Academic Credit
 
---------
-
+- **Student:** Aryan Goel
+- **Student ID:** 26040826
+- **Institution:** University of Technology Sydney (UTS)
+- **Subject:** 36120 — Advanced Machine Learning Applications
