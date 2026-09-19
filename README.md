@@ -1,9 +1,9 @@
 # nba_prep
 
-[![TestPyPI](https://img.shields.io/badge/TestPyPI-v0.3.3-blue.svg?logo=pypi&logoColor=white)](https://test.pypi.org/project/nba-prep-26040826/0.3.3/)
+[![TestPyPI](https://img.shields.io/badge/TestPyPI-v0.4.0-blue.svg?logo=pypi&logoColor=white)](https://test.pypi.org/project/nba-prep-26040826/0.4.0/)
 [![Tests Status](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel/actions/workflows/test.yml/badge.svg)](https://github.com/16aryan/36120-26SP-group38-26040826-Python-package-Aryan-Goel/actions)
 
-`nba_prep` is a Python utility package designed to clean and engineer features for predicting NBA career longevity.
+`nba_prep` is a multi-domain production Python utility package providing data preprocessing, feature engineering, and target derivation pipelines for collegiate player career longevity prediction (AT1) and Weather Intelligence forecasting (AT2 - Climate Comfort Index & Weather Hazard Category).
 
 ## Installation
 
@@ -27,6 +27,7 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 - **Recruiting & Conference Features**: Imputes high school recruiting ranks, handles Power Conference binary indexing, and calculates pace-adjusted per-minute production metrics.
 - **Decision Support & Scouting Reports**: Includes prospect classification into success probability tiers and automated scouting report card generators summarizing collegiate metrics for front-office decision-makers.
 - **Model Evaluation & Financial ROI**: Computes technical evaluation metrics (AUPRC, AUROC, F1-optimized decision thresholds) and translates model probabilities into financial business ROI (wasted rookie contract cap space avoided, scouting travel cost savings).
+- **Weather Intelligence (AT2 Extension)**: Calculates Climate Comfort Index (CCI) multi-horizon regression targets, Weather Hazard Category (WHC) multiclass classification targets, daily Open-Meteo temporal aggregations, cyclical solar calendar encodings, and strict no-leakage dry-streak counters.
 
 ## Usage
 
@@ -50,12 +51,29 @@ report = generate_scouting_report(
     rec_rank=15.0
 )
 print(report)
+
+# 4. Calculate Climate Comfort Index (CCI - AT2)
+from nba_prep.weather import calculate_climate_comfort_index, interpret_cci
+cci, components = calculate_climate_comfort_index(
+    temperature_2m=22.0, relative_humidity_2m=50.0,
+    wind_speed_10m=10.0, cloud_cover=0.0, precipitation=0.0
+)
+print(f"CCI: {cci:.1f} ({interpret_cci(cci)})")
+
+# 5. Calculate Weather Hazard Category (WHC - AT2)
+from nba_prep.weather import calculate_weather_hazard_index, convert_whi_to_whc, interpret_whc
+whi, hazards = calculate_weather_hazard_index(
+    precipitation=15.0, wind_gusts_10m=50.0, cloud_cover=50.0,
+    snowfall=0.0, temperature_2m=22.0
+)
+cat = convert_whi_to_whc(whi)
+print(f"WHC: Class {cat} ({interpret_whc(cat)})")
 ```
 --------
 ## Development & Quality Standards
 
 ### 1. Robust Unit Test Coverage
-This package is fully verified by 13 unit tests distributed across 5 specialized test suites:
+This package is fully verified by 20 unit tests distributed across 6 specialized test suites:
 * **`test_cleaning.py`** — Validates basic data cleaning utility functions under [`src/nba_prep/cleaning.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/cleaning.py):
   * **`clean_height`**: Verifies that standard height strings (e.g. `"6-7"` to `79.0` and `"6-2"` to `74.0` inches) are correctly parsed, and checks that missing (`None`), malformed strings (e.g., `"invalid"`), or floats (e.g., `6.7`) return `NaN`.
   * **`clean_year`**: Checks the mapping of college year codes (`"Fr" -> 1`, `"So" -> 2`, `"Jr" -> 3`, `"Sr" -> 4`), conversion of numeric strings (e.g., `" 2.0 "` to integer `2`), and ensures invalid year codes return `NaN`.
@@ -76,6 +94,11 @@ This package is fully verified by 13 unit tests distributed across 5 specialized
     * *Tier 4: High Risk / Undrafted Profile (Very Low)* for P < 0.10
     * Asserts bounds checking for out-of-range probabilities (1.5 -> "Invalid Probability") and type mismatches.
   * **`generate_scouting_report`**: Validates the automated text card generator. Verifies that report descriptions contain appropriate qualitative descriptors based on statistics (e.g., asserts that an elite player report contains "Elite collegiate contributor", "Exceptionally efficient", and "Five-star high school recruit", while a bench player report prints "Below-average impact" and "Highly inefficient scorer").
+* **`test_weather.py`** — Validates Weather Intelligence target derivations, aggregations, and feature calculations under [`src/nba_prep/weather.py`](src/nba_prep/weather.py):
+  * **Climate Comfort Index (CCI)**: Tests individual component scores (temperature, humidity, wind, cloud, rain), boundary conditions (0-100), composite formula verification against ideal benchmark (100.0), and 5-tier descriptive mapping (`interpret_cci`).
+  * **Weather Hazard Category (WHC)**: Asserts all 5 hazard equations (rain, wind gusts, cloud cover, snowfall, temperature), composite Weather Hazard Index (WHI), and strict 4-class categorical discretization (`convert_whi_to_whc`: 0=Low, 1=Moderate, 2=High, 3=Extreme).
+  * **Hourly-to-Daily Aggregation**: Verifies Open-Meteo aggregation rules (daily mean for temperature/humidity/wind/cloud, daily sum for precipitation/snowfall, and daily max for wind gusts).
+  * **Zero-Leakage Feature Engineering**: Confirms correct cyclical trigonometric calendar encodings (sine & cosine) and verifies strict backward shifting `shift(1)` for consecutive dry-streak days without temporal leakage.
 * **`test_evaluation.py`** — Validates technical scoring metrics and business financial ROI outputs under [`src/nba_prep/evaluation.py`](file:///Users/aryan/AT1_AML/36120-26SP-group38-26040826-package/src/nba_prep/evaluation.py):
   * **`calculate_model_metrics`**: Confirms that model metric helper computes AUPRC, AUROC, base rate, and the optimal classification threshold (based on maximizing the F1-score) for a simulated prediction array.
   * **`estimate_draft_roi`**: Validates front-office financial models. Sets a decision threshold of 0.5 on a mock group of 10 prospects to assert total players drafted, successes, busts, draft success rate (e.g. 60.0% vs base rate of 30.0%), wasted salary cap dollars (e.g., 2 busts * $5,000,000 = $10,000,000), and percentage of travel and scouting hours saved (e.g. 50.0%). Also checks handling of high thresholds resulting in zero prospects drafted.

@@ -4,13 +4,35 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nba_prep_26040826"
-version = "0.3.3"
-description = "A utility package for cleaning and engineering features for NBA career longevity prediction."
+version = "0.4.0"
+description = "Production utility package for NBA prospect analytics and Weather Intelligence (CCI / WHC) target engineering for MLaaS."
 readme = "README.md"
 authors = [
     { name = "Aryan Goel" }
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
+keywords = [
+    "weather",
+    "climate-comfort-index",
+    "weather-hazard-category",
+    "open-meteo",
+    "machine-learning",
+    "fastapi",
+    "nba-analytics"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
 dependencies = [
     "numpy",
     "pandas",
