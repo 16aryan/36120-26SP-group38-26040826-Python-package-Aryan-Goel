@@ -90,6 +90,9 @@ def calculate_climate_comfort_index(
     return cci, components
 
 
+calculate_cci = calculate_climate_comfort_index
+
+
 def interpret_cci(score: float) -> str:
     """Return textual interpretation for a CCI score according to AT2 brief."""
     val = float(score)
@@ -196,6 +199,24 @@ def convert_whi_to_whc(whi: Union[pd.Series, np.ndarray, float]) -> Union[pd.Ser
     elif np.ndim(whi) == 0:
         return int(result)
     return result
+
+
+def calculate_whc(
+    precipitation: Union[pd.Series, np.ndarray, float],
+    wind_gusts_10m: Union[pd.Series, np.ndarray, float],
+    cloud_cover: Union[pd.Series, np.ndarray, float],
+    snowfall: Union[pd.Series, np.ndarray, float],
+    temperature_2m: Union[pd.Series, np.ndarray, float],
+) -> Union[pd.Series, np.ndarray, int]:
+    """Convenience helper to compute WHC category (0, 1, 2, 3) directly from weather variables."""
+    whi, _ = calculate_weather_hazard_index(
+        precipitation=precipitation,
+        wind_gusts_10m=wind_gusts_10m,
+        cloud_cover=cloud_cover,
+        snowfall=snowfall,
+        temperature_2m=temperature_2m,
+    )
+    return convert_whi_to_whc(whi)
 
 
 WHC_LABEL_TO_NAME: Dict[int, str] = {
